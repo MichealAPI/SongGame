@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SongGame</title>
+
+    <style>
+        .d-flex {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    </style>
+
+</head>
+
+<body class="d-flex">
+
+    <canvas id="canvas"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.11.2/lib/p5.min.js"></script>
+    <script src="static/js/audio.js"></script>
+
+    <script>
+
+        const MIDDLE = 500;
+        let obstacleList = []
+
+        let pointerX = 1000;
+        let modifier = -1;
+
+        let pointerY = 0;
+
+        let player;
+
+        function setup() {
+
+            createCanvas(1000, 1000);
+            background(0);
+
+            player = new Player();
+
+            document.addEventListener('keydown', (event) => {
+
+                switch(event.key) {
+
+                    case 'w':
+                        player.moveForward();
+                        break;
+                    case 'a':
+                        player.moveLeft();
+                        break;
+                    case 's':
+                        player.moveBack();
+                        break;
+                    case 'd':
+                        player.moveRight();
+                        break;
+
+                }
+
+            });
+
+        }
+
+        function draw() {
+
+            background(0);
+
+            player.draw();
+
+            for (let obstacle of obstacleList) {
+
+                if (obstacle.isOutside()) {
+
+                    obstacleList.splice(obstacleList.indexOf(obstacle), 1);
+                    continue;
+                }
+
+                if (obstacle.hasCollided()) {
+
+                    alert('Game Over');
+                    noLoop();
+                    break;
+
+                }
+
+
+                obstacle.move();
+                obstacle.draw();
+
+            }
+
+        }
+
+        function stopGame() {
+            alert("You've reached the end!");
+            noLoop();
+        }
+
+        function pushObstacle(lowEnergy, threshold) {
+
+            let obstacle = new Obstacle(lowEnergy, threshold);
+
+            obstacleList.push(obstacle);
+
+        }
+
+        class Player {
+
+            constructor() {
+
+                this.x = 900;
+                this.y = 900;
+                this.size = 10;
+                this.speed = 5;
+
+            }
+
+            draw() {
+
+                fill(255, 0, 0);
+                rect(this.x, this.y, this.size, this.size);
+
+            }
+
+            moveLeft() {
+
+                this.x -= this.speed;
+
+            }
+
+            moveRight() {
+
+                this.x += this.speed;
+
+            }
+
+            moveBack() {
+
+                if(this.y < 1000)
+                    this.y += this.speed;
+
+            }
+
+            moveForward() {
+
+                if(this.y > 0)
+                    this.y -= this.speed;
+
+            }
+
+        }
+
+        class Obstacle {
+
+            constructor(lowFrequencyEnergy, threshold) {
+
+                this.x = pointerX;
+
+                if (pointerX > 1000 || pointerX < 0) {
+                    modifier *= -1;
+
+                }
+
+                this.y = pointerY;
+
+                pointerX += 5 * modifier;
+
+                console.log(pointerX);
+
+
+                this.size = 5;
+                this.speed = 2 + lowFrequencyEnergy / threshold;
+                this.direction = Math.PI / 2 + modifier * Math.PI / 6;
+            }
+
+            hasCollided() {
+                return Math.abs(this.x - player.x) < this.size && Math.abs(this.y - player.y) < this.size;
+
+            }
+
+            isOutside() {
+
+                return this.x < 0 || this.x > width || this.y < 0 || this.y > height;
+
+            }
+
+            move() {
+
+                this.x += this.speed * Math.cos(this.direction);
+                this.y += this.speed * Math.sin(this.direction);
+
+            }
+
+            draw() {
+
+                fill(255);
+                ellipse(this.x, this.y, this.size, this.size);
+
+            }
+
+
+        }
+
+        // WASD listeners
+
+
+
+    </script>
+
+</body>
+</html>
