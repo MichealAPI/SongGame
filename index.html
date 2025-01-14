@@ -172,7 +172,7 @@
                 console.log(pointerX);
 
 
-                this.size = 5;
+                this.size = 5 + lowFrequencyEnergy / threshold;
                 this.speed = 2 + lowFrequencyEnergy / threshold;
                 this.direction = Math.PI / 2 + modifier * Math.PI / 6;
             }
