@@ -48,7 +48,7 @@ async function generateObstacles(audioUrl) {
     });
 }
 
-generateObstacles('static/audio/audio.mp3').then(() => {
+generateObstacles('../audio/audio.mp3').then(() => {
     stopGame();
 });
 
