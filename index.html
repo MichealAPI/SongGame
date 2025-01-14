@@ -31,7 +31,7 @@
         let pointerX = 1000;
         let modifier = -1;
 
-        let pointerY = 0;
+        let pointerY = 10;
 
         let player;
 
@@ -172,7 +172,7 @@
                 console.log(pointerX);
 
 
-                this.size = 5 + lowFrequencyEnergy / threshold;
+                this.size = 5 + lowFrequencyEnergy / (threshold / 3);
                 this.speed = 2 + lowFrequencyEnergy / threshold;
                 this.direction = Math.PI / 2 + modifier * Math.PI / 6;
             }
