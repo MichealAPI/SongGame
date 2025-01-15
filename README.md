@@ -46,7 +46,6 @@
 
 - `index.html`: The main HTML file that sets up the game interface.
 - `static/js/game.js`: The main JavaScript file containing the game logic.
-- `.idea/`: Directory containing project configuration files for IntelliJ IDEA.
 
 ## License
 
