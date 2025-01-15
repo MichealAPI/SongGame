@@ -28,10 +28,9 @@
         const MIDDLE = 500;
         let obstacleList = []
 
-        let pointerX = 1000;
-        let modifier = -1;
+        let modifier = 1;
 
-        let pointerY = 10;
+        let pointerY = 70;
 
         let player;
 
@@ -39,6 +38,8 @@
 
             createCanvas(1000, 1000);
             background(0);
+
+            this.defaultDirection = Math.PI;
 
             player = new Player();
 
@@ -102,7 +103,14 @@
 
         function pushObstacle(lowEnergy, threshold) {
 
-            let obstacle = new Obstacle(lowEnergy, threshold);
+            let obstacle = new Obstacle(lowEnergy, threshold, this.defaultDirection);
+
+            this.defaultDirection -= 0.1;
+
+            if (this.defaultDirection < 0) {
+                this.defaultDirection = Math.PI;
+            }
+
 
             obstacleList.push(obstacle);
 
@@ -113,9 +121,9 @@
             constructor() {
 
                 this.x = 900;
-                this.y = 900;
+                this.y = 900; // Screen height / 2
                 this.size = 10;
-                this.speed = 5;
+                this.speed = 10;
 
             }
 
@@ -156,29 +164,22 @@
 
         class Obstacle {
 
-            constructor(lowFrequencyEnergy, threshold) {
+            constructor(lowFrequencyEnergy, threshold, direction) {
 
-                this.x = pointerX;
+                this.x = MIDDLE;
 
-                if (pointerX > 1000 || pointerX < 0) {
-                    modifier *= -1;
+                this.y = 50;
 
-                }
-
-                this.y = pointerY;
-
-                pointerX += 5 * modifier;
-
-                console.log(pointerX);
-
-
-                this.size = 5 + lowFrequencyEnergy / (threshold / 3);
-                this.speed = 2 + lowFrequencyEnergy / threshold;
-                this.direction = Math.PI / 2 + modifier * Math.PI / 6;
+                this.size = 10 + lowFrequencyEnergy / threshold;
+                this.speed = (lowFrequencyEnergy / threshold) * 2;
+                this.direction = direction + Math.random() * 2 * (Math.PI);
             }
 
             hasCollided() {
-                return Math.abs(this.x - player.x) < this.size && Math.abs(this.y - player.y) < this.size;
+                return this.x < player.x + player.size &&
+                    this.x + this.size > player.x &&
+                    this.y < player.y + player.size &&
+                    this.y + this.size > player.y;
 
             }
 

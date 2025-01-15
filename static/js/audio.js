@@ -33,7 +33,7 @@ async function generateObstacles(audioUrl) {
             const lowFrequencyEnergy = frequencyData.slice(0, 10).reduce((a, b) => a + b, 0);
 
             // Detect beats by setting a threshold
-            const threshold = 1000; // Adjust this threshold as needed
+            const threshold = 1200; // Adjust this threshold as needed
             if (lowFrequencyEnergy > threshold) {
                 // If low-frequency is
                 pushObstacle(lowFrequencyEnergy, threshold)
@@ -48,7 +48,7 @@ async function generateObstacles(audioUrl) {
     });
 }
 
-generateObstacles('static/audio/despacito.mp3').then(() => {
+generateObstacles('static/audio/eminem-rap-god.mp3').then(() => {
     stopGame();
 });
 
