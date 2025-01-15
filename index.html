@@ -2,215 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SongGame</title>
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .d-flex {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+        .bg-black {
+            background-color: black;
+        }
+        canvas {
+            border-radius: 10px;
+            border: 1px solid white;
+        }
+        button {
+            transition: .2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+            transition: .2s;
         }
     </style>
-
 </head>
+<body class="d-flex bg-black flex-column min-vh-100 align-items-center justify-content-center">
 
-<body class="d-flex">
+    <button class="btn btn-success text-white pt-2 pe-4 ps-4 pb-2 order-2" id="startBtn">Start</button>
+    <p id="result" class="text-white mt-2 order-3">Click 'Start' to play!</p>
 
-    <canvas id="canvas"></canvas>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.11.2/lib/p5.min.js"></script>
-    <script src="static/js/audio.js"></script>
-
-    <script>
-
-        const MIDDLE = 500;
-        let obstacleList = []
-
-        let modifier = 1;
-
-        let pointerY = 70;
-
-        let player;
-
-        function setup() {
-
-            createCanvas(1000, 1000);
-            background(0);
-
-            this.defaultDirection = Math.PI;
-
-            player = new Player();
-
-            document.addEventListener('keydown', (event) => {
-
-                switch(event.key) {
-
-                    case 'w':
-                        player.moveForward();
-                        break;
-                    case 'a':
-                        player.moveLeft();
-                        break;
-                    case 's':
-                        player.moveBack();
-                        break;
-                    case 'd':
-                        player.moveRight();
-                        break;
-
-                }
-
-            });
-
-        }
-
-        function draw() {
-
-            background(0);
-
-            player.draw();
-
-            for (let obstacle of obstacleList) {
-
-                if (obstacle.isOutside()) {
-
-                    obstacleList.splice(obstacleList.indexOf(obstacle), 1);
-                    continue;
-                }
-
-                if (obstacle.hasCollided()) {
-
-                    alert('Game Over');
-                    noLoop();
-                    break;
-
-                }
-
-
-                obstacle.move();
-                obstacle.draw();
-
-            }
-
-        }
-
-        function stopGame() {
-            alert("You've reached the end!");
-            noLoop();
-        }
-
-        function pushObstacle(lowEnergy, threshold) {
-
-            let obstacle = new Obstacle(lowEnergy, threshold, this.defaultDirection);
-
-            this.defaultDirection -= 0.1;
-
-            if (this.defaultDirection < 0) {
-                this.defaultDirection = Math.PI;
-            }
-
-
-            obstacleList.push(obstacle);
-
-        }
-
-        class Player {
-
-            constructor() {
-
-                this.x = 900;
-                this.y = 900; // Screen height / 2
-                this.size = 10;
-                this.speed = 10;
-
-            }
-
-            draw() {
-
-                fill(255, 0, 0);
-                rect(this.x, this.y, this.size, this.size);
-
-            }
-
-            moveLeft() {
-
-                this.x -= this.speed;
-
-            }
-
-            moveRight() {
-
-                this.x += this.speed;
-
-            }
-
-            moveBack() {
-
-                if(this.y < 1000)
-                    this.y += this.speed;
-
-            }
-
-            moveForward() {
-
-                if(this.y > 0)
-                    this.y -= this.speed;
-
-            }
-
-        }
-
-        class Obstacle {
-
-            constructor(lowFrequencyEnergy, threshold, direction) {
-
-                this.x = MIDDLE;
-
-                this.y = 50;
-
-                this.size = 10 + lowFrequencyEnergy / threshold;
-                this.speed = (lowFrequencyEnergy / threshold) * 2;
-                this.direction = direction + Math.random() * 2 * (Math.PI);
-            }
-
-            hasCollided() {
-                return this.x < player.x + player.size &&
-                    this.x + this.size > player.x &&
-                    this.y < player.y + player.size &&
-                    this.y + this.size > player.y;
-
-            }
-
-            isOutside() {
-
-                return this.x < 0 || this.x > width || this.y < 0 || this.y > height;
-
-            }
-
-            move() {
-
-                this.x += this.speed * Math.cos(this.direction);
-                this.y += this.speed * Math.sin(this.direction);
-
-            }
-
-            draw() {
-
-                fill(255);
-                ellipse(this.x, this.y, this.size, this.size);
-
-            }
-
-
-        }
-
-        // WASD listeners
-
-
-
-    </script>
+    <script src="static/js/game.js"></script>
 
 </body>
 </html>
