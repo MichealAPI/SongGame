@@ -1,5 +1,6 @@
 const startBtn = document.getElementById('startBtn');
 const warningText = document.getElementById('result');
+const selector = document.getElementById('music-selector');
 let isGameRunning = false;
 let audioContext;
 let source;
@@ -8,14 +9,19 @@ let player;
 let obstacleList = [];
 
 startBtn.addEventListener('click', () => {
+
+    if (selector.value === 'empty') {
+        alert('Please select a music');
+        return;
+    }
+
     startGame();
     startBtn.disabled = true;
 });
 
 function startGame() {
     isGameRunning = true;
-
-    generateObstacles('static/audio/eminem-rap-god.mp3').then(() => {
+    generateObstacles(`static/audio/${selector.value}.mp3`).then(() => {
         won();
     });
 }
@@ -23,8 +29,6 @@ function startGame() {
 function stopGame() {
 
     isGameRunning = false;
-    noLoop();
-    setup();
     loop();
 
     if (interval) {
