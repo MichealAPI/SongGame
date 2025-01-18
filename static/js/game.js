@@ -11,6 +11,16 @@ let player;
 let obstacleList = [];
 let gainNode;
 let drawMode = 'circle';
+let keys = {};
+
+document.addEventListener('keydown', (event) => {
+    keys[event.key] = true;
+});
+
+document.addEventListener('keyup', (event) => {
+    keys[event.key] = false;
+});
+
 
 volumeSlider.addEventListener('input', () => {
     if (gainNode) {
@@ -125,32 +135,24 @@ function setup() {
 
     player = new Player(playerX, playerY);
 
-    document.addEventListener('keydown', (event) => {
-
-        switch(event.key) {
-
-            case 'w':
-                player.moveForward();
-                break;
-            case 'a':
-                player.moveLeft();
-                break;
-            case 's':
-                player.moveBack();
-                break;
-            case 'd':
-                player.moveRight();
-                break;
-
-        }
-
-    });
-
 }
 
 function draw() {
 
     background(0);
+
+    if (keys['w']) {
+        player.moveForward();
+    }
+    if (keys['a']) {
+        player.moveLeft();
+    }
+    if (keys['s']) {
+        player.moveBack();
+    }
+    if (keys['d']) {
+        player.moveRight();
+    }
 
     player.draw();
 
