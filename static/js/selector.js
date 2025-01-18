@@ -14,3 +14,4 @@ function addMusicOption(music) {
 for (const music of musics) {
     addMusicOption(music)
 }
+

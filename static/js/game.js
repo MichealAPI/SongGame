@@ -1,12 +1,22 @@
 const startBtn = document.getElementById('startBtn');
 const warningText = document.getElementById('result');
 const selector = document.getElementById('music-selector');
+const volumeSlider = document.getElementById('volume-slider');
+
 let isGameRunning = false;
 let audioContext;
 let source;
 let interval;
 let player;
 let obstacleList = [];
+let gainNode;
+let drawMode = 'circle';
+
+volumeSlider.addEventListener('input', () => {
+    if (gainNode) {
+        gainNode.gain.value = volumeSlider.value;
+    }
+});
 
 startBtn.addEventListener('click', () => {
 
@@ -63,18 +73,18 @@ async function generateObstacles(audioUrl) {
     const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
     source = audioContext.createBufferSource();
+    gainNode = audioContext.createGain();
     const analyser = audioContext.createAnalyser();
 
     source.buffer = audioBuffer;
-    source.connect(analyser);
+    source.connect(gainNode);
+    gainNode.connect(analyser);
     analyser.connect(audioContext.destination);
 
     analyser.fftSize = 512;
     const frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
-    const sampleRate = audioContext.sampleRate;
     const duration = audioBuffer.duration;
-    const beatMap = new Map();
 
     source.start();
 
@@ -83,7 +93,6 @@ async function generateObstacles(audioUrl) {
             analyser.getByteFrequencyData(frequencyData);
 
             const currentTime = audioContext.currentTime;
-            const second = Math.floor(currentTime);
 
             const lowFrequencyEnergy = frequencyData.slice(0, 10).reduce((a, b) => a + b, 0);
 
@@ -94,7 +103,7 @@ async function generateObstacles(audioUrl) {
 
             if (currentTime >= duration) {
                 clearInterval(interval);
-                resolve(beatMap);
+                resolve();
             }
         }, 1000 / 60);
     });
@@ -103,12 +112,18 @@ async function generateObstacles(audioUrl) {
 function setup() {
 
     frameRate(60);
-    createCanvas(500, 800);
+
+    let gameCanvas = createCanvas(windowWidth * 0.7, windowHeight * 0.7);
+    gameCanvas.parent('game');
+
     background(0);
 
     this.defaultDirection = Math.PI;
 
-    player = new Player();
+    let playerX = (windowWidth * 0.7) / 2;
+    let playerY = (windowHeight * 0.7) - (windowHeight * 0.7) / 10;
+
+    player = new Player(playerX, playerY);
 
     document.addEventListener('keydown', (event) => {
 
@@ -163,9 +178,33 @@ function draw() {
 
 }
 
-function pushObstacle(lowEnergy, threshold) {
+function windowResized() {
+    resizeCanvas(windowWidth * .7, windowHeight * .7);
 
-    let obstacle = new Obstacle(lowEnergy, threshold, this.defaultDirection);
+    if(player.isOutside()) {
+        player.x = windowWidth * .7 / 2;
+        player.y = windowHeight * .7 - windowHeight * .7 / 10;
+    }
+
+}
+
+function toggleDrawMode() {
+    drawMode = drawMode === 'circle' ? 'random' : 'circle';
+}
+
+
+function pushObstacle(lowEnergy, threshold) {
+    let obstacleX = (windowWidth * 0.7) / 2;
+    let obstacleY = (windowHeight * 0.7) / 10;
+
+    let spawner = new Spawner(1);
+    if (drawMode === 'circle') {
+        spawner.drawInCircles((lowEnergy / threshold) * 2);
+    } else {
+        spawner.drawInRandomDirection((lowEnergy / threshold) * 2);
+    }
+
+    let obstacle = new Obstacle(obstacleX, obstacleY, spawner);
 
     this.defaultDirection -= 0.1;
 
@@ -173,86 +212,14 @@ function pushObstacle(lowEnergy, threshold) {
         this.defaultDirection = Math.PI;
     }
 
-
     obstacleList.push(obstacle);
-
 }
 
-class Player {
 
-    constructor() {
+// Scheduler for changing obstacles
 
-        this.x = 250;
-        this.y = 700;
-        this.size = 15;
-        this.speed = 7;
+setInterval(() => {
+    toggleDrawMode();
+}, 5000);
 
-    }
 
-    draw() {
-
-        fill(255, 0, 0);
-        rect(this.x, this.y, this.size, this.size);
-
-    }
-
-    moveLeft() {
-        this.x = max(0, this.x - this.speed);
-    }
-
-    moveRight() {
-        this.x = min(width - this.size, this.x + this.speed);
-    }
-
-    moveBack() {
-        this.y = min(height - this.size, this.y + this.speed);
-    }
-
-    moveForward() {
-        this.y = max(0, this.y - this.speed);
-    }
-
-}
-
-class Obstacle {
-
-    constructor(lowFrequencyEnergy, threshold, direction) {
-
-        this.x = 250;
-
-        this.y = 30;
-
-        this.size = 10 + lowFrequencyEnergy / threshold;
-        this.speed = (lowFrequencyEnergy / threshold) * 2;
-        this.direction = direction + Math.random() * 2 * (Math.PI);
-    }
-
-    hasCollided() {
-        return this.x < player.x + player.size &&
-            this.x + this.size > player.x &&
-            this.y < player.y + player.size &&
-            this.y + this.size > player.y;
-
-    }
-
-    isOutside() {
-
-        return this.x < 0 || this.x > width || this.y < 0 || this.y > height;
-
-    }
-
-    move() {
-
-        this.x += this.speed * Math.cos(this.direction);
-        this.y += this.speed * Math.sin(this.direction);
-
-    }
-
-    draw() {
-
-        fill(255);
-        ellipse(this.x, this.y, this.size, this.size);
-
-    }
-
-}
